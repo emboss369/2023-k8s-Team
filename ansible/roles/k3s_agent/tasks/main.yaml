@@ -1,0 +1,39 @@
+---
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{hostname}}"
+
+- name: Print the token 
+  ansible.builtin.debug:
+    msg: K3S_TOKEN is {{ k3s_server_token }} 
+  when: k3s_server_token is define
+
+- name: Get hosts
+  ansible.builtin.shell: cat /etc/hosts
+  register: hosts_file
+
+- name: add host(s) on /etc/hosts if hosts does not contain 'k3ssv'
+  lineinfile: >
+    dest=/etc/hosts
+    line="{{ item.ipaddr }}\t\t{{ item.hostname }}"
+  with_items:
+    - { hostname: "k3ssv", ipaddr: "{{ k3s_server_ip }}" }
+  when: "'k3ssv' not in hosts_file"
+
+- name: check file /usr/local/bin/k3s-agent-uninstall.sh
+  stat:
+    path: /usr/local/bin/k3s-agent-uninstall.sh
+  register: k3s_agent_uninstall
+
+- name: Uninstall kubernetes
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-agent-uninstall.sh
+  when: k3s_agent_uninstall.stat.exists
+
+- name : Install k3s agent
+  ansible.builtin.command:
+    cmd: curl -sfL https://get.k3s.io | K3S_URL=https://k3ssv:6443 K3S_TOKEN={{ k3s_server_token }} sh -
+    register: result
+
+- debug:
+    msg: "result is {{ result }}"

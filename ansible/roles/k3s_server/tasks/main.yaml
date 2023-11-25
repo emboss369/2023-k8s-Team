@@ -1,0 +1,23 @@
+---
+- name: check file /usr/local/bin/k3s-uninstall.sh
+  stat:
+    path: /usr/local/bin/k3s-uninstall.sh
+  register: k3s_uninstall
+
+- name: Uninstall kubernetes
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-uninstall.sh
+  when: k3s_uninstall.stat.exists
+
+- name: Install kubernetes
+  ansible.builtin.command:
+    cmd: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable-agent" K3S_KUBECONFIG_MODE="644" sh -
+
+- name: Get token
+  ansible.builtin.shell: cat /var/lib/rancher/k3s/server/node-token
+  register: k3s_server_token
+
+- name: Print the token 
+  ansible.builtin.debug:
+    msg: K3S_TOKEN is {{ k3s_server_token }} 
+  when: k3s_server_token is define

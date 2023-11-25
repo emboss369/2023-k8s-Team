@@ -1,0 +1,17 @@
+---
+#mkdir ./greengrass-v2-credentials
+- name: Credential directory created
+  file:
+    path: /home/opeadmin/greengrass-v2-credentials
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "775"
+
+- name: Configure your AWS credentials
+  template:
+    src: ../templates/credentials.j2
+    dest: /home/opeadmin/greengrass-v2-credentials/credentials
+    owner: root
+    group: root
+    mode: 0664

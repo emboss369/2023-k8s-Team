@@ -1,0 +1,17 @@
+all:
+  vars:
+    k3s_server_ip: 10.211.55.24
+  hosts:
+    k3ssv:
+      ansible_connection: local
+      ansible_host: localhost
+  children:
+    agents:
+      hosts:
+        k3sgw:
+          vars:
+            hostname: k3sgw
+        k3ssv:
+          vars:
+            hostname: k3ssv
+

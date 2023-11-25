@@ -11,7 +11,7 @@ all:
         k3sgw:
           vars:
             hostname: k3sgw
-        k3ssv:
+        k3sds:
           vars:
-            hostname: k3ssv
+            hostname: k3sds
 

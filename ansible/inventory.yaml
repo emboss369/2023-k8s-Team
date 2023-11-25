@@ -7,8 +7,10 @@ all:
       ansible_host: localhost
     k3sgw:
       hostname: k3sgw
+      ansible_host: 10.211.55.25
     k3sds:
       hostname: k3sds
+      ansible_host: 10.211.55.26
   children:
     agents:
       hosts:

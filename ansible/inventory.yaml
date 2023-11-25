@@ -5,13 +5,13 @@ all:
     k3ssv:
       ansible_connection: local
       ansible_host: localhost
+    k3sgw:
+      hostname: k3sgw
+    k3sds:
+      hostname: k3sds
   children:
     agents:
       hosts:
         k3sgw:
-          vars:
-            hostname: k3sgw
         k3sds:
-          vars:
-            hostname: k3sds
 

@@ -31,9 +31,19 @@ flowchart LR
 
 下記OSのVMを３台用意する。
 
-|OS|Version|Type|
-|-|-|-
-|Ubuntu| 22.04|server|
+|OS|Version|Type|user|
+|-|-|-|-|
+|Ubuntu| 22.04|server|opeadmin|
+
+opeadminは権限昇格可能にしておく。
+
+https://www.shellhacks.com/ansible-sudo-a-password-is-required/
+
+```sh
+$ sudo visudo
+# And append a line as follows:
+opeadmin  ALL=(ALL) NOPASSWD:ALL
+```
 
 
 ### Parallelsを使ったVMの準備
@@ -95,6 +105,18 @@ opeadmin@k3ssv:~/workspace/2023-k8s-Team/ansible$ source k3s/bin/activate
 ```playbook_ssh_authorize.yaml``` を ```-k``` 付きで実行する。
 
 それ以降は公開鍵認証が使用できるようにする。
+
+note: 事前にssh接続してfingerprintでyesを押しておくこと。
+
+```sh
+# 鍵の作成と配布
+(k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_ssh_authorize.yaml -k
+# 接続確認
+(k3s) opeadmin@k3ssv:ansible$ ssh k3sgw hostname
+k3sgw ←これが表示されること
+(k3s) opeadmin@k3ssv:ansible$ ssh k3sds hostname
+k3sds ←これが表示されること
+```
 
 ### Ansibleの実行
 

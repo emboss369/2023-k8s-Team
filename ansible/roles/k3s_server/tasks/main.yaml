@@ -22,3 +22,14 @@
     msg: K3S_TOKEN is {{ k3s_server_token }} 
   when: k3s_server_token is defined
   ignore_errors: '{{ ansible_check_mode }}'
+
+- name: check nodes
+  shell:
+    cmd: 'k3s kubectl get nodes'
+  register: k3s_server_nodes
+
+- name: Print the k3s server nodes 
+  ansible.builtin.debug:
+    msg: k3s server nodes {{ k3s_server_nodes }} 
+  when: k3s_server_nodes is defined
+  ignore_errors: '{{ ansible_check_mode }}'

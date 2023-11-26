@@ -6,7 +6,6 @@
 - name: Print the token 
   ansible.builtin.debug:
     msg: K3S_TOKEN is {{ k3s_server_token }} 
-  when: k3s_server_token is defined
 
 - name: Get hosts
   ansible.builtin.shell: cat /etc/hosts

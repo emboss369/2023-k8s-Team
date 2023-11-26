@@ -8,3 +8,4 @@ TES_ROLE_ALIAS_NAME: k3s_TokenExchangeRoleAlias
 COMPONENT_DEFAULT_USER: ggc_user:ggc_group
 DEPLOY_DEV_TOOLS: false
 CONTAINER_PORT: 8883
+CREDENTIL_PATH: /home/opeadmin/greengrass-v2-credentials/

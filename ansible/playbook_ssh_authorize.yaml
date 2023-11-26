@@ -20,6 +20,10 @@
       delegate_to: localhost
       run_once: true
 
+    - name: debug
+      ansible.builtin.debug:
+        msg: "result is {{ ansible_env.USER }}"
+
     - name: authorize public key
       ansible.posix.authorized_key:
         user: "{{ ansible_env.USER }}"

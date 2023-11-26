@@ -32,5 +32,5 @@
     cmd: "kubectl -n greengrass get pod -o wide --no-headers | awk '{print $3}'"
   register: pod_state
   until: pod_state.stdout == "Running"
-  retries: 10
-  delay: 5
+  retries: 30
+  delay: 10

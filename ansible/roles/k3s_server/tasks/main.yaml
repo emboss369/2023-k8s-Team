@@ -11,11 +11,7 @@
 
 - name: Download kubernetes installer
   shell:
-    cmd: 'curl -sfL https://get.k3s.io'
-
-- name: Install kubernetes
-  shell:
-    cmd: 'INSTALL_K3S_EXEC="--disable-agent" K3S_KUBECONFIG_MODE="644" sh -'
+    cmd: 'curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable-agent" K3S_KUBECONFIG_MODE="644" sh -'
 
 - name: Get token
   ansible.builtin.shell: cat /var/lib/rancher/k3s/server/node-token

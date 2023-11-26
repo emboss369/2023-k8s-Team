@@ -28,6 +28,11 @@
       ansible.posix.authorized_key:
         user: "{{ ansible_env.USER }}"
         key: "{{ lookup('ansible.builtin.file', lookup('ansible.builtin.env', 'HOME') + '/.ssh/id_rsa_ansible.pub' ) }}"
+      register: res_exists
+
+    - name: authorized_key is 
+      ansible.builtin.debug:
+        msg: "{{ res_exists }}"
 
     - name: ssh user config
       community.general.ssh_config:

@@ -18,6 +18,6 @@
     src: greengrass-v2-deployment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
 
-- name: Apply Greengrass Core Pod
-  shell:
-    cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
+# - name: Apply Greengrass Core Pod
+#   shell:
+#     cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"

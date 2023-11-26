@@ -3,15 +3,15 @@
 - name: assert [ AWS_ACCESS_KEY_ID ]
   assert:
     that: lookup('env', 'AWS_ACCESS_KEY_ID') != ""
-    fail_msg: "Please set AWS_ACCESS_KEY_ID"
+    fail_msg: "[ERROR] Please set AWS_ACCESS_KEY_ID"
     success_msg: "AWS_ACCESS_KEY_ID={{lookup('env', 'AWS_ACCESS_KEY_ID')}}"
 
 - name: assert [ AWS_SECRET_ACCESS_KEY ]
   assert:
     that: lookup('env', 'AWS_SECRET_ACCESS_KEY') != ""
-    fail_msg: "Please set AWS_SECRET_ACCESS_KEY"
+    fail_msg: "[ERROR] Please set AWS_SECRET_ACCESS_KEY"
     success_msg: "AWS_SECRET_ACCESS_KEY={{lookup('env', 'AWS_SECRET_ACCESS_KEY')}}"
-    
+
 - name: Create credential directory 
   file:
     path: /home/opeadmin/greengrass-v2-credentials

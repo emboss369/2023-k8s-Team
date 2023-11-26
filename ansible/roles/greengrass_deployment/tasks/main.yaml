@@ -1,7 +1,7 @@
 ---
 - name: Check file {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml
   stat:
-    path: lookup('ansible.builtin.env','HOME')/greengrass-v2-deployment.yaml
+    path: "{{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
   register: greengrass_deployment
 
 - debug:

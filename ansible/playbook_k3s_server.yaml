@@ -15,4 +15,22 @@
 
   roles:
     - role: k3s_agent
+      tags: k3s_agent
 
+- name: Setup Greengrass Core
+  hosts: k3sgw
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: greengrass_setup
+      tags: greengrass_setup
+
+- name: Deployment Greengrass Core with kubernetes
+  hosts: k3ssv
+  gather_facts: true
+  become: false
+
+  roles:
+    - role: greengrass_deployment
+      tags: greengrass_deployment

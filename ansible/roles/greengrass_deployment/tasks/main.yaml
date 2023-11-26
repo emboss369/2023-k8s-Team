@@ -3,10 +3,7 @@
   template:
     src: greengrass-v2-deployment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
-    owner: root
-    group: root
-    mode: 0664
-    
+
 - name: Download kubernetes installer
   shell:
     cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"

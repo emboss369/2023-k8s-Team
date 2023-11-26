@@ -10,11 +10,11 @@
   when: k3s_uninstall.stat.exists
 
 - name: Download kubernetes installer
-  ansible.builtin.command:
+  shell:
     cmd: 'curl -sfL https://get.k3s.io'
 
 - name: Install kubernetes
-  ansible.builtin.command:
+  shell:
     cmd: 'INSTALL_K3S_EXEC="--disable-agent" K3S_KUBECONFIG_MODE="644" sh -'
 
 - name: Get token

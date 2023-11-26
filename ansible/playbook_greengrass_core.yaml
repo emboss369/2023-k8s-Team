@@ -1,0 +1,17 @@
+---
+# あとで一つのプレイブックに完成させる予定。
+- name: Setup Greengrass Core
+  hosts: k3sgw
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: greengrass_core
+
+- name: Deployment
+  hosts: k3ssv
+  gather_facts: true
+  become: false
+
+  roles:
+    - role: greengrass_core

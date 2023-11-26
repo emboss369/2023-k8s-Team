@@ -16,4 +16,3 @@ all:
       hosts:
         k3sgw:
         k3sds:
-

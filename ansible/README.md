@@ -29,11 +29,11 @@ flowchart LR
 
 ## 検証用VMの準備
 
-下記OSのVMを３台用意する。
+検証では下記OSのVMを３台用意した
 
-|OS|Version|Type|user|
+|OS|Version|Type|Product|user|
 |-|-|-|-|
-|Ubuntu| 22.04|server|opeadmin|
+|Ubuntu| 22.04|server|arm64|opeadmin|
 
 opeadminは権限昇格可能にしておく。
 
@@ -124,3 +124,32 @@ export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
 export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 
 (k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s_server.yaml --private-key ~/.ssh/id_rsa_ansible
+
+
+unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
+
+### AWS IoT Greengrass イメージを構築する
+
+[Document](https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/build-greengrass-dockerfile.html)
+
+イメージの構築コマンド例を以下に示す。コマンドの詳細は[ドキュメント](https://docs.docker.com/)を参照。
+
+```sh
+git clone https://github.com/aws-greengrass/aws-greengrass-docker.git
+cd aws-greengrass-docker
+git checkout refs/tags/v2.5.3
+
+docker pull --platform linux/amd64 amazonlinux:2
+docker pull --platform linux/arm64/v8 amazonlinux:2
+
+sudo docker build --platform linux/amd64 -t "amd64/aws-iot-greengrass:nucleus-version" ./
+sudo docker build --platform linux/arm64/v8 -t "arm64/aws-iot-greengrass:nucleus-version" ./
+
+docker login
+docker tag 973de5ff9ae9 emboss369/amd64/aws-iot-greengrass:2.5.3
+docker tag 17dfd4d2e357 emboss369/arm64/aws-iot-greengrass:2.5.3
+docker manifest annotate --arch amd64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-amd64
+docker manifest annotate --arch arm64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-arm64
+docker manifest push emboss369/greengrass:2.5.3
+```
+

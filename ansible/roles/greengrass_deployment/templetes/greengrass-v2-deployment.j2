@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greengrass
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: greengrass
+  name: greengrass-deployment
+spec:
+  selector:
+    matchLabels:
+      app: greengrass
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: greengrass
+    spec:
+      containers:
+      - name: greengrass
+        image: emboss369/greengrass:2.5.3
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: GGC_ROOT_PATH
+          value: "{{ GGC_ROOT_PATH }}"
+        - name: AWS_REGION
+          value: "{{ AWS_REGION }}"
+        - name: PROVISION
+          value: "true"
+        - name: THING_NAME
+          value: "{{ THING_NAME }}"
+        - name: THING_GROUP_NAME
+          value: "{{ THING_GROUP_NAME }}"
+        - name: TES_ROLE_NAME
+          value: "{{ TES_ROLE_NAME }}"
+        - name: TES_ROLE_ALIAS_NAME
+          value: "{{ TES_ROLE_ALIAS_NAME }}"
+        - name: COMPONENT_DEFAULT_USER
+          value: "{{ COMPONENT_DEFAULT_USER }}"
+        - name: DEPLOY_DEV_TOOLS
+          value: "{{ DEPLOY_DEV_TOOLS }}"
+        ports:
+        - containerPort: {{ CONTAINER_PORT }}
+        volumeMounts:
+        - mountPath: /root/.aws
+          name: credentials
+        - mountPath: /greengrass/v2/logs
+          name: logs
+      volumes:
+      - name: credentials
+        hostPath:
+          path: {{ lookup('ansible.builtin.env','HOME') }}/.aws
+          type: Directory
+      - name: logs
+        hostPath:
+          path: {{ lookup('ansible.builtin.env','HOME') }}/greengrass/v2/logs 
+          type: Directory

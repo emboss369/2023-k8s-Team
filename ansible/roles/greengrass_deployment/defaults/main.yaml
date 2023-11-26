@@ -1,0 +1,10 @@
+---
+GGC_ROOT_PATH: /greengrass/v2
+AWS_REGION: ap-southeast-2
+THING_NAME: k3s_gg_core
+THING_GROUP_NAME: k3s_gg_core_group
+TES_ROLE_NAME: k3s_TokenExchangeRole
+TES_ROLE_ALIAS_NAME: k3s_TokenExchangeRoleAlias
+COMPONENT_DEFAULT_USER: ggc_user:ggc_group
+DEPLOY_DEV_TOOLS: false
+CONTAINER_PORT: 8883

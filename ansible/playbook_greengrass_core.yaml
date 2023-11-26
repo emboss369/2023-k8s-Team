@@ -6,7 +6,8 @@
   become: true
 
   roles:
-    - role: greengrass_core
+    - role: greengrass_deployment
+      tags: greengrass_deployment
 
 - name: Deployment
   hosts: k3ssv
@@ -15,3 +16,4 @@
 
   roles:
     - role: greengrass_core
+      tags: greengrass_core

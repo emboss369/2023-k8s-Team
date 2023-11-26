@@ -4,6 +4,9 @@
     path: lookup('ansible.builtin.env','HOME')/greengrass-v2-deployment.yaml
   register: greengrass_deployment
 
+- debug:
+    msg: "greengrass_deployment.stat.exists is {{ greengrass_deployment.stat.exists }}"
+
 - name: Delete Greengrass Core Pod
   shell:
     cmd: "kubectl delete -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"

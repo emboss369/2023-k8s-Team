@@ -11,6 +11,7 @@
   shell:
     cmd: "kubectl delete -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
   when: greengrass_deployment.stat.exists
+  ignore_errors: true
 
 - name: Greengrass v2 deployment file
   template:

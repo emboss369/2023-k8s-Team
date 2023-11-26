@@ -52,9 +52,10 @@ spec:
       volumes:
       - name: credentials
         hostPath:
-          path: CREDENTIL_PATH
+          path: {{ CREDENTIL_PATH }}
           type: Directory
       - name: logs
         hostPath:
           path: {{ lookup('ansible.builtin.env','HOME') }}/greengrass/v2/logs 
           type: Directory
+      nodeName: "{{ TARGET_NODE_NAME }}"

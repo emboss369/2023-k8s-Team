@@ -26,12 +26,12 @@
   register: k3s_agent_uninstall
 
 - name: Uninstall kubernetes
-  ansible.builtin.command:
+  shell:
     cmd: /usr/local/bin/k3s-agent-uninstall.sh
   when: k3s_agent_uninstall.stat.exists
 
 - name : Install k3s agent
-  ansible.builtin.command:
+  shell:
     cmd: curl -sfL https://get.k3s.io | K3S_URL=https://k3ssv:6443 K3S_TOKEN={{ k3s_server_token }} sh -
     register: result
 

@@ -1,6 +1,39 @@
 # Ansible
 
+## 作るもののイメージ
+
+- オフィスビルを管理し、ボイラーやビル空調設備などから温度・湿度・圧力・水漏れ・その他ビル管理の情報を吸い上げる
+  - 簡単なシステムを構築
+- データの吸い上げ
+  - AWS Greengrassを使って構築してみる
+  - Kubernetesを使って構築してみる
+  - Amazon IoT Coreに格納する
+  
+![Test Image 3](/ansible/doc/story.drawio.png)
+
 ## 今回の構成
+
+- VMは手動で用意
+- Ansibleを用意
+- Kubernetesを用意
+- 管理サーバということで、KubernetesのコントロールプレーンとAnsibleのサーバは１台で賄う
+  - もちろん別々のほうが望ましいが集約する
+    - PC台数減らしたい
+    - どちらも管理ソフト
+- ゲートウェイを１台設置
+- ゲートウェイにデータを送るダウンストリームを１台設置
+
+## 検証用VMの準備
+
+検証では下記OSのVMを３台用意した
+
+|Name|OS|Version|Type|Product|User|Address|
+|-|-|-|-|-|-|-|
+|k3ssv|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.24|
+|k3sgw|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.25|
+|k3sds|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.26|
+
+## システム構成
 
 ```mermaid
 flowchart LR
@@ -21,19 +54,31 @@ flowchart LR
     end
     end
     
-    k3sserver --- k3sagent
-    k3sserver --- k3sagent2
-    client --> ggc
-    ggc --> cloud[IoT Core in the cloud]
+    k3sserver -- Container Management --> 
+    k3sagent -- Manage --> docker
+    k3sserver -- Container Management --> k3sagent2
+    k3sagent2 -- Manage --> docker2
+    client == temperature ==> ggc
+    ggc == temperature ==> cloud[IoT Core in the cloud]
+    ansible -. Setup .-> k3sds
+    ansible -. Setup .->  k3sgw
+    ansible -. Setup .->  ansible
 ```
 
-## 検証用VMの準備
+## セットアップ
 
-検証では下記OSのVMを３台用意した
-
-|OS|Version|Type|Product|user|
-|-|-|-|-|-|
-|Ubuntu| 22.04|server|arm64|opeadmin|
+- VM用意する
+- Ansibleをセットアップ
+  - 手作業で行う
+- Ansibleコントロールノードで、SSH公開鍵設定を行う
+  - AnsibleでSSH接続設定
+- AWS IoT Greengrass イメージを構築する
+- Ansibleを実行する
+  - k3s serverをセットアップ
+  - k3s agentをセットアップ（ゲートウェイ用）
+  - k3s agentをセットアップ（ダウンストリーム用）
+  - ゲートウェイにGreengrassを導入
+  - ダウンストリームにMQTTクライアント導入　　　　　← いまココ
 
 opeadminは権限昇格可能にしておく。
 
@@ -44,7 +89,6 @@ $ sudo visudo
 # And append a line as follows:
 opeadmin  ALL=(ALL) NOPASSWD:ALL
 ```
-
 
 ### Parallelsを使ったVMの準備
 
@@ -130,43 +174,50 @@ k3sds ←これが表示されること
 
 作成したイメージは、Dockerリポジトリに配置しておく。
 
+イメージ作成はVM上でなくともよい。今回はMacを使用した。
+
+- 前提条件
+  - Docker DesktopがインストールされているPCであること
+    - Docker 4.19.0 (106363)
+  - 今回検証した環境は Mac M1
+    - 上記以外の環境では未検証
+
 ```sh
 # awsからチェックアウト
 git clone https://github.com/aws-greengrass/aws-greengrass-docker.git
 cd aws-greengrass-docker
 # バージョン指定
 git checkout refs/tags/v2.5.3
-
-# マルチプラットフォーム対応する
+# docker pullでローカルに取得する
 docker pull --platform linux/amd64 amazonlinux:2
 docker pull --platform linux/arm64/v8 amazonlinux:2
-
+# ビルド
 sudo docker build --platform linux/amd64 -t "amd64/aws-iot-greengrass:nucleus-version" ./
 sudo docker build --platform linux/arm64/v8 -t "arm64/aws-iot-greengrass:nucleus-version" ./
 # ログイン
 docker login
 # 任意の名前に変更
-docker tag 973de5ff9ae9 emboss369/amd64/aws-iot-greengrass:2.5.3
-docker tag 17dfd4d2e357 emboss369/arm64/aws-iot-greengrass:2.5.3
+docker tag 973de5ff9ae9 emboss369/greengrass:2.5.3-amd64
+docker tag 17dfd4d2e357 emboss369/greengrass:2.5.3-arm64
 # 各プラットフォーム分をUpする
+docker push emboss369/greengrass:2.5.3-arm64
+docker push emboss369/greengrass:2.5.3-amd64 
+# (オプション)マルチプラットフォーム対応する
+docker manifest create emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-amd64 emboss369/greengrass:2.5.3-arm64
 docker manifest annotate --arch amd64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-amd64
 docker manifest annotate --arch arm64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-arm64
-# マルチプラットフォーム対応する
 docker manifest push emboss369/greengrass:2.5.3
 ```
-
 
 ### Ansibleの実行
 
 ```sh
+# フォルダ移動
+cd ~/workspace/2023-k8s-Team/ansible
 # AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEYをexport
 export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
 export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
-
-# フォルダ移動
-cd ~/workspace/2023-k8s-Team/ansible
-
-
+# Ansible実行
 (k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s_server.yaml --private-key ~/.ssh/id_rsa_ansible
 
 unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること

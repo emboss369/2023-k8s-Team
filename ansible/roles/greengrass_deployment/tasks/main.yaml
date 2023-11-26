@@ -7,17 +7,30 @@
 - debug:
     msg: "greengrass_deployment.stat.exists is {{ greengrass_deployment.stat.exists }}"
 
-- name: Delete Greengrass Core Pod
-  shell:
-    cmd: "kubectl delete -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
-  when: greengrass_deployment.stat.exists
-  ignore_errors: true
+# 削除処理不要（再インストールするので）
+# - name: Delete Greengrass Core Pod
+#   shell:
+#     cmd: "kubectl delete -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
+#   when: greengrass_deployment.stat.exists
+#   ignore_errors: true
 
 - name: Greengrass v2 deployment file
   template:
     src: greengrass-v2-deployment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
 
-# - name: Apply Greengrass Core Pod
-#   shell:
-#     cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
+- name: Apply Greengrass Core Pod
+  shell:
+    cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
+  register: result
+
+- debug:
+    msg: result
+
+- name: Check Greengrass Core Pod running
+  shell:
+    cmd: "kubectl -n greengrass get pod -o wide --no-headers | awk '{print $3}'"
+  register: pod_state
+  until: pod_state.stdout == "Running"
+  retries: 10
+  delay: 5

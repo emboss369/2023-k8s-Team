@@ -32,7 +32,7 @@ flowchart LR
 検証では下記OSのVMを３台用意した
 
 |OS|Version|Type|Product|user|
-|-|-|-|-|
+|-|-|-|-|-|
 |Ubuntu| 22.04|server|arm64|opeadmin|
 
 opeadminは権限昇格可能にしておく。
@@ -63,7 +63,13 @@ opeadmin  ALL=(ALL) NOPASSWD:ALL
 
 ### EC2を使ったVMの準備（未定稿）
 
-## k3s Server(k3ssv) 
+ansibleでVMを３台作成する、その方法は
+
+### Vagrantを使ったVMの準備
+
+省略
+
+## k3s Server(k3ssv)
 
 Ansibleをインストールする。
 
@@ -94,11 +100,9 @@ opeadmin@k3ssv:~/workspace/2023-k8s-Team/ansible$ source k3s/bin/activate
 (k3s) ansible$ pip install pip --upgrade
 (k3s) ansible$ pip install ansible==9.0.1
 (k3s) ansible$ pip install stormssh
-
 ```
 
-## サーバー、エージェントのインストール
-
+## Greengrassの構築
 
 ### Ansibleコントロールノードで、SSH公開鍵設定を行う
 
@@ -118,38 +122,52 @@ k3sgw ←これが表示されること
 k3sds ←これが表示されること
 ```
 
-### Ansibleの実行
-
-export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
-export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
-
-(k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s_server.yaml --private-key ~/.ssh/id_rsa_ansible
-
-
-unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
-
 ### AWS IoT Greengrass イメージを構築する
 
 [Document](https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/build-greengrass-dockerfile.html)
 
 イメージの構築コマンド例を以下に示す。コマンドの詳細は[ドキュメント](https://docs.docker.com/)を参照。
 
+作成したイメージは、Dockerリポジトリに配置しておく。
+
 ```sh
+# awsからチェックアウト
 git clone https://github.com/aws-greengrass/aws-greengrass-docker.git
 cd aws-greengrass-docker
+# バージョン指定
 git checkout refs/tags/v2.5.3
 
+# マルチプラットフォーム対応する
 docker pull --platform linux/amd64 amazonlinux:2
 docker pull --platform linux/arm64/v8 amazonlinux:2
 
 sudo docker build --platform linux/amd64 -t "amd64/aws-iot-greengrass:nucleus-version" ./
 sudo docker build --platform linux/arm64/v8 -t "arm64/aws-iot-greengrass:nucleus-version" ./
-
+# ログイン
 docker login
+# 任意の名前に変更
 docker tag 973de5ff9ae9 emboss369/amd64/aws-iot-greengrass:2.5.3
 docker tag 17dfd4d2e357 emboss369/arm64/aws-iot-greengrass:2.5.3
+# 各プラットフォーム分をUpする
 docker manifest annotate --arch amd64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-amd64
 docker manifest annotate --arch arm64 emboss369/greengrass:2.5.3 emboss369/greengrass:2.5.3-arm64
+# マルチプラットフォーム対応する
 docker manifest push emboss369/greengrass:2.5.3
 ```
 
+
+### Ansibleの実行
+
+```sh
+# AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEYをexport
+export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+
+# フォルダ移動
+cd ~/workspace/2023-k8s-Team/ansible
+
+
+(k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s_server.yaml --private-key ~/.ssh/id_rsa_ansible
+
+unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
+```

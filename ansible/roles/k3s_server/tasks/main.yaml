@@ -21,3 +21,4 @@
   ansible.builtin.debug:
     msg: K3S_TOKEN is {{ k3s_server_token }} 
   when: k3s_server_token is define
+  ignore_errors: '{{ ansible_check_mode }}'

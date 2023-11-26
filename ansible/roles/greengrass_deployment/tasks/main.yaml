@@ -1,9 +1,19 @@
 ---
+- name: Check file {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml
+  stat:
+    path: lookup('ansible.builtin.env','HOME')/greengrass-v2-deployment.yaml
+  register: greengrass_deployment
+
+- name: Delete Greengrass Core Pod
+  shell:
+    cmd: "kubectl delete -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
+  when: greengrass_deployment.stat.exists
+
 - name: Greengrass v2 deployment file
   template:
     src: greengrass-v2-deployment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"
 
-- name: Download kubernetes installer
+- name: Apply Greengrass Core Pod
   shell:
     cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/greengrass-v2-deployment.yaml"

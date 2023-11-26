@@ -32,7 +32,7 @@
 
 - name : Install k3s agent
   shell:
-    cmd: curl -sfL https://get.k3s.io | K3S_URL=https://k3ssv:6443 K3S_TOKEN={{ k3s_server_token }} sh -
+    cmd: 'curl -sfL https://get.k3s.io | K3S_URL=https://k3ssv:6443 K3S_TOKEN={{ k3s_server_token.stdout }} sh -'
     register: result
 
 - debug:

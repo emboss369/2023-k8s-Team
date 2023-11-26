@@ -10,7 +10,7 @@
 
 - name: Print the token 
   ansible.builtin.debug:
-    msg: K3S_TOKEN is {{ k3s_server_token }} 
+    msg: K3S_TOKEN is {{ k3s_server_token.stdout }} 
 
 - name: Get hosts
   ansible.builtin.shell: cat /etc/hosts
@@ -37,7 +37,7 @@
 - name : Install k3s agent
   shell:
     cmd: 'curl -sfL https://get.k3s.io | K3S_URL=https://k3ssv:6443 K3S_TOKEN={{ k3s_server_token.stdout }} sh -'
-    register: result
+  register: result
 
 - debug:
     msg: "result is {{ result }}"

@@ -222,3 +222,92 @@ export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 
 unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
 ```
+
+### 手動でGreengrass CoreをDeployする場合
+
+```sh
+# 対象端末ログイン
+export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+### ユーザ関係
+cd 
+sudo adduser --system ggc_user
+sudo addgroup --system ggc_group
+sudo useradd -s /bin/bash -m opeadmin
+sudo passwd opeadmin
+sudo usermod -aG ggc_group opeadmin
+
+# Credensialの作成
+sudo mkdir /home/opeadmin/greengrass-v2-credentials
+
+### sudoからEOFまでが1つのコマンド
+sudo tee /home/opeadmin/greengrass-v2-credentials/credentials <<EOF
+[default]
+aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
+EOF
+
+# log用ディレクトリの作成
+sudo mkdir -p /home/opeadmin/greengrass/v2/logs
+sudo chown -R opeadmin:ggc_group /home/opeadmin/
+```
+
+### 確認
+
+```sh
+# Credensialの確認
+sudo cat /home/opeadmin/greengrass-v2-credentials/credentials
+# logディレクトリの確認
+sudo ls -la /home/opeadmin/greengrass/v2/logs
+cd ~/2023-k8s-Team/
+cat greengrass-v2-deployment.yaml
+```
+
+```sh
+# マスターログイン
+cd 
+git clone -b k3s https://github.com/emboss369/2023-k8s-Team.git
+cd 2023-k8s-Team
+
+
+vim ansible/roles/greengrass_deployment/defaults/main.yaml
+### ---- 編集例（環境に合わせて）
+GGC_ROOT_PATH: /greengrass/v2
+AWS_REGION: ap-northeast-1
+THING_NAME: k8s_gg_core
+THING_GROUP_NAME: k8s_gg_core_group
+TES_ROLE_NAME: k8s_TokenExchangeRole
+TES_ROLE_ALIAS_NAME: k8s_TokenExchangeRoleAlias
+COMPONENT_DEFAULT_USER: ggc_user:ggc_group
+DEPLOY_DEV_TOOLS: false
+CONTAINER_PORT: 8883
+CREDENTIL_PATH: /home/opeadmin/greengrass-v2-credentials/
+TARGET_NODE_NAME: ip-10-0-35-104
+### ---
+
+cd ansible/roles/greengrass_deployment/templates/
+sed 's/path.*logs/path: \/home\/opeadmin\/greengrass\/v2\/logs/g' \
+greengrass-v2-deployment.j2 > greengrass-v2-deployment-k8s.j2
+
+cd ~/2023-k8s-Team/
+
+### catからEOFまでが1つのコマンド
+cat <<EOF > likes_ansible_script.py
+from jinja2 import Tevim mplate, Environment, FileSystemLoader
+import sys, yaml
+
+env = Environment(loader=FileSystemLoader('./ansible/roles/greengrass_deployment/templates/', encoding='utf8'))
+tmpl = env.get_template('greengrass-v2-deployment-k8s.j2')
+
+with open('./ansible/roles/greengrass_deployment/defaults/main.yaml') as import_yml:
+  sys.stdout.write(tmpl.render(yaml.load(import_yml)))
+EOF
+
+python3 likes_ansible_script.py > greengrass-v2-deployment.yaml
+```
+
+### デプロイ
+
+```sh
+kubectl apply -f greengrass-v2-deployment.yaml
+```

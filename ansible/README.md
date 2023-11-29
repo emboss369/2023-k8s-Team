@@ -223,10 +223,53 @@ export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
 ```
 
-cd cdk_app
+### IoT モノを作成する
+
+```sh
+# Ubuntu 上に Node.js + npm の環境を構築する。
+
+$ sudo apt update
+$ sudo apt install nodejs npm
+$ sudo npm -g install n
+$ sudo n stable
+# $ sudo apt purge nodejs npm
+# $ sudo apt autoremove
+
+# 一度シェルを再起動したのち、バージョンを確認する。
+
+opeadmin@k3ssv:cdk_app$ node -v
+v20.10.0
+opeadmin@k3ssv:cdk_app$ npm -v
+10.2.3
+
+# https://aws.amazon.com/jp/getting-started/guides/setup-cdk/module-two/
+# AWS SDK のインストール
+opeadmin@k3ssv:cdk_app$ sudo npm install -g aws-cdk
+opeadmin@k3ssv:cdk_app$ cdk --version
+2.111.0 (build 2ccb59e)
+
+# https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/getting-started-install.html
+# AWS CLIのインストール(armの場合)
 
 
+cd
+opeadmin@k3ssv:~$ url "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+opeadmin@k3ssv:~$ unzip awscliv2.zip
+opeadmin@k3ssv:~$ sudo ./aws/install
 
+# AWS CLIのインストール(amdの場合)
+opeadmin@k3ssv:~$ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+opeadmin@k3ssv:~$ sudo apt install zip unzip
+unzip awscliv2.zip
+sudo ./aws/install
+
+# AWS CLIのアンインストール
+sudo rm /usr/local/bin/aws
+sudo rm /usr/local/bin/aws_completer
+sudo rm -rf /usr/local/aws-cli
+sudo rm -rf ~/.aws/
+
+```
 
 
 

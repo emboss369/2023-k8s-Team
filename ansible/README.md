@@ -223,6 +223,13 @@ export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
 ```
 
+cd cdk_app
+
+
+
+
+
+
 ### 手動でGreengrass CoreをDeployする場合
 
 ```sh
@@ -250,20 +257,14 @@ EOF
 # log用ディレクトリの作成
 sudo mkdir -p /home/opeadmin/greengrass/v2/logs
 sudo chown -R opeadmin:ggc_group /home/opeadmin/
-```
-
-### 確認
-
-```sh
+### 作成したファイルの確認
 # Credensialの確認
 sudo cat /home/opeadmin/greengrass-v2-credentials/credentials
 # logディレクトリの確認
 sudo ls -la /home/opeadmin/greengrass/v2/logs
 cd ~/2023-k8s-Team/
 cat greengrass-v2-deployment.yaml
-```
 
-```sh
 # マスターログイン
 cd 
 git clone -b k3s https://github.com/emboss369/2023-k8s-Team.git

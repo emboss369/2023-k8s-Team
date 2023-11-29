@@ -225,6 +225,8 @@ unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれている�
 
 ### IoT モノを作成する
 
+roles/iot/defaults/main.yamlを設定する。
+
 ```sh
 # Ubuntu 上に Node.js + npm の環境を構築する。
 

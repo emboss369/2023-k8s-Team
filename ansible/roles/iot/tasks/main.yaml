@@ -37,3 +37,21 @@
     sudo ./aws/install
   become: true
   when: ansible_architecture == "x86_64"
+
+- name: Create credential directory 
+  file:
+    path: /home/opeadmin/.aws/
+    state: directory
+    mode: "775"
+
+- name: Configure your AWS credentials
+  template:
+    src: credentials.j2
+    dest: /home/opeadmin/.aws/credentials
+    mode: 0664
+
+- name: Configure your AWS config file
+  template:
+    src: config.j2
+    dest: /home/opeadmin/.aws/config
+    mode: 0664

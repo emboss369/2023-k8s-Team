@@ -111,24 +111,24 @@
     aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text  --query certificateDescription.certificatePem > ./cert/device.pem.crt
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  when: no cert.stat.exists
+  when: not cert.stat.exists
   register: result
 
 - debug:
     msg: result
-    when: no cert.stat.exists
+    when: not cert.stat.exists
 
 - name: Check created certification
   ansible.builtin.shell: |
     openssl  x509 -text < ./cert/cdevice.pem.crt
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  when: no cert.stat.exists
+  when: not cert.stat.exists
   register: result
 
 - debug:
     msg: result
-    when: no cert.stat.exists
+    when: not cert.stat.exists
 
 - name: Copy policy templte
   template:

@@ -68,14 +68,14 @@
 
 - name: Create credential directory 
   file:
-    path: /home/opeadmin/.aws/
+    path: "{{ lookup('ansible.builtin.env','HOME') }}/.aws/"
     state: directory
     mode: "775"
 
 - name: Configure your AWS credentials
   template:
     src: credentials.j2
-    dest: /home/opeadmin/.aws/credentials
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/.aws/credentials"
     mode: 0664
 
 - name: Configure your AWS config file
@@ -90,13 +90,18 @@
   ansible.builtin.shell: 
     cmd: 'aws iot create-thing --thing-name {{ IOT_THING_NAME }}'
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:
     msg: result
 
-- name: Create certification
+- name: Check certification cert.json
+  stat:
+    path: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/cert.json"
+  register: cert
+
+- name: Create certification 
   ansible.builtin.shell: |
     mkdir cert
     aws iot create-keys-and-certificate --set-as-active > ./cert/cert.json
@@ -105,33 +110,37 @@
     CERTIFICATED_ID=`cat ./cert/certificate-id.txt | sed 's/"//g'`
     aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text  --query certificateDescription.certificatePem > ./cert/device.pem.crt
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  when: no cert.stat.exists
   register: result
 
 - debug:
     msg: result
+    when: no cert.stat.exists
 
 - name: Check created certification
   ansible.builtin.shell: |
-    openssl  x509 -text < ./cert/cert.pem
+    openssl  x509 -text < ./cert/cdevice.pem.crt
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  when: no cert.stat.exists
   register: result
 
 - debug:
     msg: result
+    when: no cert.stat.exists
 
 - name: Copy policy templte
   template:
     src: k3s_iot_policy.j2
-    dest: ~/workspace/2023-k8s-Team/ansible/policy.json
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/policy.json"
 
 # https://docs.aws.amazon.com/cli/latest/reference/iot/create-policy.html
 - name: Create IoT Policy
   ansible.builtin.shell: 
     cmd: 'aws iot create-policy --policy-name {{ IOT_POLICY_NAME }} --policy-document file://policy.json'
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:
@@ -141,7 +150,7 @@
   ansible.builtin.shell: 
     cmd: 'aws iot get-policy --policy-name {{ IOT_POLICY_NAME }} > {{ IOT_POLICY_NAME }}.json'
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:
@@ -154,7 +163,7 @@
     aws iot list-principal-policies --principal $CERTARN
     aws iot attach-thing-principal --thing-name {{ IOT_THING_NAME }} --principal $CERTARN
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:
@@ -165,7 +174,7 @@
     CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
     aws iot list-thing-principals --thing-name sunflower {{ IOT_THING_NAME }}
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:
@@ -176,7 +185,7 @@
     CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
     aws iot iot describe-endpoint --region {{ AWS_REGION }}
   args:
-    chdir: ~/workspace/2023-k8s-Team/ansible
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
 
 - debug:

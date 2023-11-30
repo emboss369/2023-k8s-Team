@@ -2,7 +2,7 @@
 - name: Setup iot mono
   hosts: k3ssv
   gather_facts: true
-  become: true
+  become: false
 
   roles:
     - role: iot

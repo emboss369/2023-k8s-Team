@@ -218,7 +218,7 @@ cd ~/workspace/2023-k8s-Team/ansible
 export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
 export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 # Ansible実行
-(k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s_server.yaml --private-key ~/.ssh/id_rsa_ansible
+(k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s.yaml --private-key ~/.ssh/id_rsa_ansible
 
 unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれていること
 ```
@@ -322,9 +322,48 @@ openssl  x509 -text < ./cert/cert.pem
 # クライアントデバイスとの関連付けを管理する (AWS CLI)
 https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-devices.html#manage-client-device-associations-cli
 
+ssh k3sds
+mkdir ~/certs
+exit <- ansibleサーバに戻る
+
+# certsのコピー svからdsへ。
+(k3s) opeadmin@k3ssv:ansible$ scp cert/device.pem.crt k3sds:~/certs/device.pem.crt
+device.pem.crt     100% 1225     2.9MB/s   00:00    
+(k3s) opeadmin@k3ssv:ansible$ scp cert/private.pem.key k3sds:~/certs/private.pem.key
+private.pem.key    100% 1676     4.1MB/s   00:00  
+
+ssh k3sds
+# ルートCA証明書のダウンロード
+$ wget https://www.amazontrust.com/repository/AmazonRootCA1.pem -O certs/AmazonRootCA1.pem
+
+# ダウンストリームからゲートウェイを経由し、IoT Coreにデータを通してみる（Dockerなしで）
+git clone https://github.com/aws/aws-iot-device-sdk-python-v2.git
+# AWS IoT Device SDK v2 for Python をインストールします。
+sudo apt install -y  python3-pip
+# AWS IoT Device SDK v2 for Python のサンプルフォルダに移動します。
+cd aws-iot-device-sdk-python-v2/samples
+# Hello World送ります
+python3 basic_discovery.py \
+  --thing_name k3s_iot_client \
+  --topic 'clients/k3s_iot_client/hello/world' \
+  --message 'Hello World!' \
+  --ca_file ~/certs/AmazonRootCA1.pem \
+  --cert ~/certs/device.pem.crt \
+  --key ~/certs/private.pem.key \
+  --region ap-southeast-2 \
+  --verbosity Warn
+
+basic_discovery.py を改造してダミー温度データを送るプログラムを作る。
+
+
+
+
 
 ```
 [クライアントデバイスとの関連付けを管理する (AWS CLI)](https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-devices.html#manage-client-device-associations-cli)
+
+
+
 
 
 ### 手動でGreengrass CoreをDeployする場合

@@ -1,6 +1,6 @@
 - name: Install nodejs
   ansible.builtin.apt:
-    name: nodejs npm
+    name: nodejs npm jq
     state: present
   become: true
 
@@ -21,20 +21,28 @@
     sudo rm -rf /usr/local/aws-cli
     sudo rm -rf ~/.aws/
   become: true
+  register: result
+
+- debug:
+    msg: result
 
 - name: Install AWS CLI aarch64
   ansible.builtin.shell: |
+    cd
     curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-    unzip awscliv2.zip
+    unzip -o awscliv2.zip
     sudo ./aws/install
+    rm awscliv2.zip
   become: true
   when: ansible_architecture == "aarch64"
 
 - name: Install AWS CLI x86_64
   ansible.builtin.shell: |
+    cd
     curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-    unzip awscliv2.zip
+    unzip -o awscliv2.zip
     sudo ./aws/install
+    rm awscliv2.zip
   become: true
   when: ansible_architecture == "x86_64"
 
@@ -55,3 +63,105 @@
     src: config.j2
     dest: /home/opeadmin/.aws/config
     mode: 0664
+
+# aws iot create-thing --thing-name k3s_iot_client
+
+- name: Create Thing
+  ansible.builtin.shell: 
+    cmd: 'aws iot create-thing --thing-name {{ IOT_THING_NAME }}'
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Create certification
+  ansible.builtin.shell: |
+    mkdir cert
+    aws iot create-keys-and-certificate --set-as-active > ./cert/cert.json
+    cat ./cert/cert.json | jq .keyPair.PrivateKey -r > ./cert/private.pem.key
+    jq .certificateId ./cert/cert.json > ./cert/certificate-id.txt
+    CERTIFICATED_ID=`cat ./cert/certificate-id.txt | sed 's/"//g'`
+    aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text  --query certificateDescription.certificatePem > ./cert/device.pem.crt
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Check created certification
+  ansible.builtin.shell: |
+    openssl  x509 -text < ./cert/cert.pem
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Copy policy templte
+  template:
+    src: k3s_iot_policy.j2
+    dest: ~/workspace/2023-k8s-Team/ansible/policy.json
+
+# https://docs.aws.amazon.com/cli/latest/reference/iot/create-policy.html
+- name: Create IoT Policy
+  ansible.builtin.shell: 
+    cmd: 'aws iot create-policy --policy-name {{ IOT_POLICY_NAME }} --policy-document file://policy.json'
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Get IoT Policy
+  ansible.builtin.shell: 
+    cmd: 'aws iot get-policy --policy-name {{ IOT_POLICY_NAME }} > {{ IOT_POLICY_NAME }}.json'
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Attach a IoT policy to a certificate
+  ansible.builtin.shell: |
+    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    aws iot attach-principal-policy --principal $CERTARN --policy-name {{ IOT_POLICY_NAME }}
+    aws iot list-principal-policies --principal $CERTARN
+    aws iot attach-thing-principal --thing-name {{ IOT_THING_NAME }} --principal $CERTARN
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+- name: Show things principals
+  ansible.builtin.shell: |
+    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    aws iot list-thing-principals --thing-name sunflower {{ IOT_THING_NAME }}
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+
+- name: Show endpoint
+  ansible.builtin.shell: |
+    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    aws iot iot describe-endpoint --region {{ AWS_REGION }}
+  args:
+    chdir: ~/workspace/2023-k8s-Team/ansible
+  register: result
+
+- debug:
+    msg: result
+
+# クライアントデバイスとの関連付け
+- name:

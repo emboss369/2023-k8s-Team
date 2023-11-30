@@ -227,6 +227,8 @@ unreachable=0    failed=0 ← 最後のPLAY RECAPにこれが含まれている�
 
 roles/iot/defaults/main.yamlを設定する。
 
+
+
 ```sh
 # Ubuntu 上に Node.js + npm の環境を構築する。
 
@@ -245,14 +247,15 @@ opeadmin@k3ssv:cdk_app$ npm -v
 10.2.3
 
 # https://aws.amazon.com/jp/getting-started/guides/setup-cdk/module-two/
-# AWS SDK のインストール
+# AWS CDK のインストール
 opeadmin@k3ssv:cdk_app$ sudo npm install -g aws-cdk
 opeadmin@k3ssv:cdk_app$ cdk --version
 2.111.0 (build 2ccb59e)
 
+# 結局、セットアップしたもののCDKはつかわずじまいだった。スキップ可能
+
 # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/getting-started-install.html
 # AWS CLIのインストール(armの場合)
-
 
 cd
 opeadmin@k3ssv:~$ url "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
@@ -270,6 +273,55 @@ sudo rm /usr/local/bin/aws
 sudo rm /usr/local/bin/aws_completer
 sudo rm -rf /usr/local/aws-cli
 sudo rm -rf ~/.aws/
+
+
+# aws configure しておく
+
+# aws cdkアプリケーションを作成する（1回だけ、作成済みのをGithubにUpするのでCloneするだけ。）
+cd ~/workspace/2023-k8s-Team/cdk_app/
+mkdir cdk-k3s-iot
+cd cdk-k3s-iot
+cdk init app --language typescript
+# 結局 aws cdkは使わなかった。
+
+# https://docs.aws.amazon.com/cli/latest/reference/iot/create-thing.html
+
+aws iot delete-thing --thing-name k3s_iot_client
+aws iot create-thing --thing-name k3s_iot_client
+
+(k3s) opeadmin@k3ssv:cdk_app$ aws iot delete-thing --thing-name k3s_iot_client
+(k3s) opeadmin@k3ssv:cdk_app$ aws iot create-thing --thing-name k3s_iot_client
+{
+    "thingName": "k3s_iot_client",
+    "thingArn": "arn:aws:iot:ap-southeast-2:630878272277:thing/k3s_iot_client",
+    "thingId": "56b25a01-b42e-4d08-914b-f97b3d904b1a"
+}
+
+cd ~/workspace/2023-k8s-Team/ansible
+sudo apt install -y jq
+mkdir cert
+aws iot create-keys-and-certificate --set-as-active > ./cert/cert.json
+cat ./cert/cert.json | jq .keyPair.PrivateKey -r > ./cert/private.pem.key
+jq .certificateId ./cert/cert.json > ./cert/certificate-id.txt
+CERTIFICATED_ID=`cat ./cert/certificate-id.txt | sed 's/"//g'`
+aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text \
+  --query certificateDescription.certificatePem > ./cert/cert.pem
+
+# 確認
+openssl  x509 -text < ./cert/cert.pem
+
+# テンプレートの確認
+
+
+
+# ルート証明書はクライアント上に必要。
+# wget https://www.amazontrust.com/repository/AmazonRootCA1.pem -O AmazonRootCA1.pem
+
+次はここから。
+
+# クライアントデバイスとの関連付けを管理する (AWS CLI)
+https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-devices.html#manage-client-device-associations-cli
+
 
 ```
 

@@ -1,1 +1,3 @@
 AWS_REGION: ap-southeast-2
+IOT_THING_NAME: k3s_iot_client
+IOT_POLICY_NAME: k3s_iot_policy

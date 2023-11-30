@@ -217,3 +217,28 @@
 
 - debug:
     msg: result
+
+# https://docs.aws.amazon.com/cli/latest/reference/iot/describe-thing.html
+- name: Get IoT Core thingArn from describe-thing
+  shell: |
+    aws iot describe-thing --thing-name k3s_gg_core | \
+      jq .thingArn | sed 's/"//g'
+  register: thingArn
+
+- name: Copy deployment templete
+  template:
+    src: deplyment.j2
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cli-deployment.json"
+
+
+# https://docs.aws.amazon.com/cli/latest/reference/greengrassv2/create-deployment.html
+- name: Create Deplyment for greengrass core thing
+  shell: |
+    aws greengrassv2 create-deployment \
+      --cli-input-json file://cli-deployment.json
+  args:
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  register: result
+
+- debug:
+    msg: result

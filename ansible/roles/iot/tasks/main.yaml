@@ -120,7 +120,7 @@
 
 - name: Check created certification
   ansible.builtin.shell: |
-    openssl  x509 -text < ./cert/cdevice.pem.crt
+    openssl  x509 -text < ./cert/device.pem.crt
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   when: not cert.stat.exists

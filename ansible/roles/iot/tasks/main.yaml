@@ -180,7 +180,7 @@
 - name: Show things principals
   ansible.builtin.shell: |
     CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
-    aws iot list-thing-principals --thing-name sunflower {{ IOT_THING_NAME }}
+    aws iot list-thing-principals --thing-name {{ IOT_THING_NAME }}
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result

@@ -198,7 +198,7 @@
 - name: Show endpoint
   ansible.builtin.shell: |
     CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
-    aws iot iot describe-endpoint --region {{ AWS_REGION }}
+    aws iot describe-endpoint --region {{ AWS_REGION }}
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result

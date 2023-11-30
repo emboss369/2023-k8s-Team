@@ -1,3 +1,9 @@
+- name: Install jq
+  ansible.builtin.apt:
+    name: jq
+    state: present
+  become: true
+
 - name: Install nodejs
   ansible.builtin.apt:
     name: nodejs npm jq
@@ -150,7 +156,6 @@
 
 - debug:
     msg: result
-
 
 - name: Show endpoint
   ansible.builtin.shell: |

@@ -163,5 +163,14 @@
 - debug:
     msg: result
 
-# クライアントデバイスとの関連付け
-- name:
+# https://docs.aws.amazon.com/cli/latest/reference/greengrassv2/batch-associate-client-device-with-core-device.html
+# batch associate client device with core device
+- name: Associate client device with core device
+  shell: |
+    aws greengrassv2 batch-associate-client-device-with-core-device \
+      --core-device-thing-name {{ THING_NAME }} \
+      --entries thingName={{ IOT_THING_NAME }} 
+  register: result
+
+- debug:
+    msg: result

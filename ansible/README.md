@@ -324,7 +324,7 @@ https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-
 
 
 ```
-
+[クライアントデバイスとの関連付けを管理する (AWS CLI)](https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-devices.html#manage-client-device-associations-cli)
 
 
 ### 手動でGreengrass CoreをDeployする場合

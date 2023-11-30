@@ -151,11 +151,17 @@
 #   register: result
 
 # https://docs.aws.amazon.com/cli/latest/reference/iot/create-policy.html
+
+- name: Get IoT Policies
+  ansible.builtin.shell: aws iot list-policies | jq '.policies[] | .policyName'
+  register: policies
+
 - name: Create IoT Policy
   ansible.builtin.shell: 
     cmd: 'aws iot create-policy --policy-name {{ IOT_POLICY_NAME }} --policy-document file://policy.json'
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  when: "'{{ IOT_POLICY_NAME }}' not in policies.stdout"
   register: result
 
 - debug:

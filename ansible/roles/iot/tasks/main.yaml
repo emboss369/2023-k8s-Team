@@ -30,9 +30,9 @@
     n stable
   become: true
 
-- name: Update Node.js to Latest Version
-  ansible.builtin.shell: sudo npm install -g aws-cdk
-  become: true
+# - name: Install AWS CDK
+#   ansible.builtin.shell: sudo npm install -g aws-cdk
+#   become: true
 
 - name: Uninstall AWS CLI
   ansible.builtin.shell: |
@@ -85,7 +85,7 @@
     mode: 0664
 
 # aws iot create-thing --thing-name k3s_iot_client
-
+# https://docs.aws.amazon.com/cli/latest/reference/iot/create-thing.html
 - name: Create Thing
   ansible.builtin.shell: 
     cmd: 'aws iot create-thing --thing-name {{ IOT_THING_NAME }}'

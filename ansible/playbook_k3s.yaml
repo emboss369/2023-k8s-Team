@@ -34,3 +34,12 @@
   roles:
     - role: greengrass_deployment
       tags: greengrass_deployment
+
+- name: Setup iot thing
+  hosts: k3ssv
+  gather_facts: true
+  become: false
+
+  roles:
+    - role: iot
+      tags: iot

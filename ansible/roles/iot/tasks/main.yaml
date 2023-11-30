@@ -6,7 +6,9 @@
 
 - name: Install nodejs
   ansible.builtin.apt:
-    name: nodejs npm jq
+    pkg:
+    - nodejs
+    - npm
     state: present
   become: true
 

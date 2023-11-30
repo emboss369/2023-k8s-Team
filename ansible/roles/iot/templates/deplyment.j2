@@ -1,0 +1,36 @@
+{
+    "targetArn": "{{ thingArn.stdout }}",
+    "deploymentName": "Deployment for {{ THING_NAME }}",
+    "components": {
+        "aws.greengrass.Nucleus": {
+            "componentVersion": "2.12.0"
+        },
+        "aws.greengrass.clientdevices.Auth": {
+            "componentVersion": "2.4.4",
+            "runWith": {},
+            "configurationUpdate": {
+                "merge": "{\"deviceGroups\":{\"formatVersion\":\"2021-03-05\",\"definitions\":{\"MyDeviceGroup\":{\"selectionRule\":\"thingName: *\",\"policyName\":\"MyClientDevicePolicy\"}},\"policies\":{\"MyClientDevicePolicy\":{\"AllowConnect\":{\"statementDescription\":\"Allow client devices to connect.\",\"operations\":[\"mqtt:connect\"],\"resources\":[\"*\"]},\"AllowPublish\":{\"statementDescription\":\"Allow client devices to publish to all topics.\",\"operations\":[\"mqtt:publish\"],\"resources\":[\"*\"]},\"AllowSubscribe\":{\"statementDescription\":\"Allow client devices to subscribe to all topics.\",\"operations\":[\"mqtt:subscribe\"],\"resources\":[\"*\"]}}}}}"
+            }
+        },
+        "aws.greengrass.clientdevices.mqtt.Moquette": {
+            "componentVersion": "2.3.5"
+        },
+        "aws.greengrass.clientdevices.mqtt.Bridge": {
+            "componentVersion": "2.3.0",
+            "runWith": {},
+            "configurationUpdate": {
+                "merge": "{\"mqttTopicMapping\":{\"HelloWorldIotCoreMapping\":{\"topic\":\"clients/+/hello/world\",\"source\":\"LocalMqtt\",\"target\":\"IotCore\"},\"forIoTTaskTeam\":{\"topic\":\"data/IoTTask-IoTCoreMono\",\"source\":\"LocalMqtt\",\"target\":\"IotCore\"}}}"
+            }
+        },
+        "aws.greengrass.clientdevices.IPDetector": {
+            "componentVersion": "2.1.8"
+        }
+    },
+    "deploymentPolicies": {
+        "failureHandlingPolicy": "ROLLBACK",
+        "componentUpdatePolicy": {
+            "action": "NOTIFY_COMPONENTS",
+            "timeoutInSeconds": 60
+        }
+    }
+}

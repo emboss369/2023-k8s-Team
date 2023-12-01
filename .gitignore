@@ -70,3 +70,8 @@ $RECYCLE.BIN/
 
 # environment file
 .env
+
+# key files
+*.pem
+*.pem.crt
+*.pem.key

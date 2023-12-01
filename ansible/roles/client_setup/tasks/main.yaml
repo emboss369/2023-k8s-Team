@@ -1,6 +1,6 @@
 - name: Create credential directory 
   file:
-    path: {{ CERTS_PATH }}
+    path: "{{ CERTS_PATH }}"
     state: directory
     owner: "root"
     group: "root"

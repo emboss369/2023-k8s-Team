@@ -28,8 +28,6 @@ spec:
           value: "{{ AWS_REGION }}"
         - name: MQTT_TOPIC
           value: "{{ MQTT_TOPIC }}"
-        # ports:
-        # - containerPort: {{ CONTAINER_PORT }}
         volumeMounts:
         - mountPath: /app/certs
           name: certs

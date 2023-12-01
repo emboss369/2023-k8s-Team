@@ -23,7 +23,7 @@ spec:
         image: emboss369/simulated-temperature-sensor:2.31
         env:
         - name: THING_NAME
-          value: "{{ THING_NAME }}"
+          value: "{{ IOT_THING_NAME }}"
         - name: REGION
           value: "{{ AWS_REGION }}"
         - name: MQTT_TOPIC

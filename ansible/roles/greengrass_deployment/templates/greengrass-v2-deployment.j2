@@ -47,12 +47,18 @@ spec:
         volumeMounts:
         - mountPath: /root/.aws
           name: credentials
+        - mountPath: /root/components
+          name: components
         - mountPath: /greengrass/v2/logs
           name: logs
       volumes:
       - name: credentials
         hostPath:
           path: {{ CREDENTIL_PATH }}
+          type: Directory
+      - name: components
+        hostPath:
+          path: {{ COMPONENTS_PATH }}
           type: Directory
       - name: logs
         hostPath:

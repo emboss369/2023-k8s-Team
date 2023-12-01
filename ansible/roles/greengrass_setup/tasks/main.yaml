@@ -20,6 +20,14 @@
     group: "root"
     mode: "775"
 
+- name: Create components directory 
+  file:
+    path: /home/opeadmin/components/
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "775"
+
 - name: Configure your AWS credentials
   template:
     src: credentials.j2

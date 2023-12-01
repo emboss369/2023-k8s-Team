@@ -448,3 +448,12 @@ python3 likes_ansible_script.py > greengrass-v2-deployment.yaml
 ```sh
 kubectl apply -f greengrass-v2-deployment.yaml
 ```
+
+
+### ノウハウ
+
+Docker運用時の難しさ
+
+Greengrass Coreには、GGC内にモジュール配信する機能がある。
+
+Dockerを再起動すると、更ののGreengrass Coreに戻ってしまう？なんで？

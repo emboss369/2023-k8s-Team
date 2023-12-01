@@ -364,8 +364,8 @@ docker pull --platform linux/arm64/v8 docker.io/python:3.10-slim
 sudo docker build --platform linux/arm64/v8 -t "emboss369/simulated-temperature-sensor:2.31-arm64" ./
 
 ### 各プラットフォーム分をUpする
-docker push emboss369/simulated-temperature-sensor:2.31-arm64
 docker push emboss369/simulated-temperature-sensor:2.31-amd64
+docker push emboss369/simulated-temperature-sensor:2.31-arm64
 ### (オプション)マルチプラットフォーム対応する
 docker manifest create emboss369/simulated-temperature-sensor:2.31 \
   emboss369/simulated-temperature-sensor:2.31-arm64 \
@@ -470,3 +470,34 @@ kubectl apply -f greengrass-v2-deployment.yaml
 
 
 ansible-playbook -i inventory.yaml playbook_k3s.yaml --private-key ~/.ssh/id_rsa_ansible --tags "client_setup,client_deployment"
+
+
+## kubernetesあるある１ Deploymentをdeleteしたい
+kubectl -n greengrass delete deployment client-deployment
+
+kubectl -n greengrass get pod -o wide 
+
+kubectl apply -f client-deployment.yaml
+
+##しょうがい
+
+https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/client-devices-tutorial.html
+
+今回、IP ディテクター (aws.greengrass.clientdevices.IPDetector)を使用したが、正しいIPを返さない？
+
+(オプション) IP 検出コンポーネントをデプロイして、コアデバイスの MQTT ブローカエンドポイントを AWS IoT Greengrass クラウドサービスに自動的に報告します。ルータがコアデバイスに MQTT ブローカポートを転送する場合など、複雑なネットワーク設定がある場合には、このコンポーネントを使用することはできません。
+
+### Dockerあるある、起動しない
+tty: true
+kubectl exec -n greengrass -it client-deployment-8486b5ffc-hfsm8 /bin/bash 
+
+
+python3 SimulatedTemperatureSensor.py \
+  --thing_name $THING_NAME \
+  --topic $MQTT_TOPIC \
+  --ca_file $CA_FILE \
+  --cert $PEM_CRT \
+  --key $PEM_KEY \
+  --region $REGION \
+  --verbosity ${VERBOS} \
+  --max_pub_ops $MAX_PUB_OPS

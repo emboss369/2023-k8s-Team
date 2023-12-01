@@ -20,4 +20,12 @@ ENV REGION="ap-southeast-2"
 ENV VERBOS="Warn"
 ENV MAX_PUB_OPS="36000"
 
-CMD [ "sh", "-c", "python3", "-u", "SimulatedTemperatureSensor.py", "--thing_name", "$THING_NAME", "--topic", "$MQTT_TOPIC", "--ca_file", "$CA_FILE", "--cert", "$PEM_CRT", "--key", "$PEM_KEY", "--region", "$REGION", "--verbosity", "${VERBOS}", "--max_pub_ops", "$MAX_PUB_OPS" ]
+CMD  python3 -u SimulatedTemperatureSensor.py \
+  --thing_name $THING_NAME \
+  --topic $MQTT_TOPIC \
+  --ca_file $CA_FILE \
+  --cert $PEM_CRT \
+  --key $PEM_KEY \
+  --region $REGION \
+  --verbosity $VERBOS \
+  --max_pub_ops $MAX_PUB_OPS

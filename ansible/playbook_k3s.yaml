@@ -32,6 +32,7 @@
   become: false
 
   roles:
+    - role: common_settings
     - role: greengrass_deployment
       tags: greengrass_deployment
 
@@ -41,6 +42,7 @@
   become: false
 
   roles:
+    - role: common_settings
     - role: iot
       tags: iot
 

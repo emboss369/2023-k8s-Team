@@ -1,0 +1,7 @@
+---
+# for iot client app
+AWS_REGION: ap-southeast-2
+THING_NAME: k3s_gg_core
+MQTT_TOPIC: clients/k3s_iot_client/hello/world
+TARGET_NODE_NAME: k3sds
+CERTS_PATH: /home/opeadmin/certs

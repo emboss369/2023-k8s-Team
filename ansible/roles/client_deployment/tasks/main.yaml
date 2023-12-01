@@ -1,0 +1,20 @@
+- name: IoT Client Application deployment file
+  template:
+    src: client-deployment.j2
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
+
+- name: Apply IoT Client Application  Pod
+  shell:
+    cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
+  register: result
+
+- debug:
+    msg: result
+
+# - name: Check IoT Client Application Pod running
+#   shell:
+#     cmd: "kubectl -n greengrass get pod -o wide --no-headers | awk '{print $3}'"
+#   register: pod_state
+#   until: pod_state.stdout == "Running"
+#   retries: 30
+#   delay: 10

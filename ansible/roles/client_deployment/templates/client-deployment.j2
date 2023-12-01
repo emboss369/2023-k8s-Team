@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greengrass
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: greengrass
+  name: client-deployment
+spec:
+  selector:
+    matchLabels:
+      app: iotclient
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iotclient
+    spec:
+      containers:
+      - name: iotclient
+        image: emboss369/simulated-temperature-sensor:2.31
+        env:
+        - name: THING_NAME
+          value: "{{ THING_NAME }}"
+        - name: REGION
+          value: "{{ AWS_REGION }}"
+        - name: MQTT_TOPIC
+          value: "{{ MQTT_TOPIC }}"
+        # ports:
+        # - containerPort: {{ CONTAINER_PORT }}
+        volumeMounts:
+        - mountPath: /app/certs
+          name: certs
+      volumes:
+      - name: certs
+        hostPath:
+          path: {{ CERTS_PATH }}
+          type: Directory
+      nodeName: "{{ TARGET_NODE_NAME }}"

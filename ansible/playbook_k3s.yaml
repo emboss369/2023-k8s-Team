@@ -43,3 +43,24 @@
   roles:
     - role: iot
       tags: iot
+
+- name: Setup iot client
+  hosts: k3sds
+  gather_facts: true
+  become: false
+
+  roles:
+    - role: common_settings
+    - role: client_setup
+      tags: client_setup
+
+- name: Deploy the iot client pod in Kubernetes
+  hosts: k3ssv
+  gather_facts: true
+  become: false
+
+  roles:
+    # common_settingsに変数を集約
+    - role: common_settings
+    - role: client_deployment
+      tags: client_deployment

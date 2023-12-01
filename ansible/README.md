@@ -352,18 +352,35 @@ python3 basic_discovery.py \
   --key ~/certs/private.pem.key \
   --region ap-southeast-2 \
   --verbosity Warn
+  --max_pub_ops 36000
 
-basic_discovery.py を改造してダミー温度データを送るプログラムを作る。
 
 
+# イメージを作ってコンテナに格納する（1回のみでよい）
+docker pull --platform linux/amd64 python:3.10-slim
+sudo docker build --platform linux/amd64 -t "emboss369/simulated-temperature-sensor:2.31-amd64" ./
+
+docker pull --platform linux/arm64/v8 docker.io/python:3.10-slim
+sudo docker build --platform linux/arm64/v8 -t "emboss369/simulated-temperature-sensor:2.31-arm64" ./
+
+### 各プラットフォーム分をUpする
+docker push emboss369/simulated-temperature-sensor:2.31-arm64
+docker push emboss369/simulated-temperature-sensor:2.31-amd64
+### (オプション)マルチプラットフォーム対応する
+docker manifest create emboss369/simulated-temperature-sensor:2.31 \
+  emboss369/simulated-temperature-sensor:2.31-arm64 \
+  emboss369/simulated-temperature-sensor:2.31-amd64
+docker manifest annotate --arch amd64 emboss369/simulated-temperature-sensor:2.31 \
+  emboss369/simulated-temperature-sensor:2.31-amd64
+docker manifest annotate --arch arm64 emboss369/simulated-temperature-sensor:2.31 \
+  emboss369/simulated-temperature-sensor:2.31-arm64
+docker manifest push emboss369/simulated-temperature-sensor:2.31
+```
 
 
 
 ```
 [クライアントデバイスとの関連付けを管理する (AWS CLI)](https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/associate-client-devices.html#manage-client-device-associations-cli)
-
-
-
 
 
 ### 手動でGreengrass CoreをDeployする場合
@@ -450,10 +467,6 @@ kubectl apply -f greengrass-v2-deployment.yaml
 ```
 
 
-### ノウハウ
 
-Docker運用時の難しさ
 
-Greengrass Coreには、GGC内にモジュール配信する機能がある。
-
-Dockerを再起動すると、更ののGreengrass Coreに戻ってしまう？なんで？
+ansible-playbook -i inventory.yaml playbook_k3s.yaml --private-key ~/.ssh/id_rsa_ansible --tags "client_setup,client_deployment"

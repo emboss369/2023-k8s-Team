@@ -1,0 +1,29 @@
+- name: Create credential directory 
+  file:
+    path: {{ CERTS_PATH }}
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "776"
+
+- name: Copy certification file
+  copy:
+    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/device.pem.crt"
+    dest: "{{ CERTS_PATH }}/device.pem.crt"
+    owner: "root"
+    group: "root"
+    mode: "776"
+
+- name: Copy key file
+  copy:
+    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/private.pem.key"
+    dest: "{{ CERTS_PATH }}/private.pem.key"
+    owner: "root"
+    group: "root"
+    mode: "776"
+
+- name: Download root CA certificate
+  ansible.builtin.shell: |
+    wget https://www.amazontrust.com/repository/AmazonRootCA1.pem -O AmazonRootCA1.pem
+  args:
+    chdir: "{{ CERTS_PATH }}"

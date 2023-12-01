@@ -1,25 +1,19 @@
-- name: Create credential directory 
+- name: Create certification directory 
   file:
     path: "{{ CERTS_PATH }}"
     state: directory
-    owner: "root"
-    group: "root"
     mode: "776"
 
 - name: Copy certification file
   copy:
     src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/device.pem.crt"
     dest: "{{ CERTS_PATH }}/device.pem.crt"
-    owner: "root"
-    group: "root"
     mode: "776"
 
 - name: Copy key file
   copy:
     src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/private.pem.key"
     dest: "{{ CERTS_PATH }}/private.pem.key"
-    owner: "root"
-    group: "root"
     mode: "776"
 
 - name: Download root CA certificate

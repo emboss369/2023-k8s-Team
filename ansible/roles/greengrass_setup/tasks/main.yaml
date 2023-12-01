@@ -20,14 +20,6 @@
     group: "root"
     mode: "776"
 
-# - name: Create components directory 
-#   file:
-#     path: /home/opeadmin/greengrass/
-#     state: directory
-#     owner: "root"
-#     group: "root"
-#     mode: "776"
-
 - name: Configure your AWS credentials
   template:
     src: credentials.j2
@@ -36,8 +28,8 @@
     group: root
     mode: 0664
 
-- name: Create a directory if it does not exist
+- name: Create greengrass route directory
   ansible.builtin.file:
-    path: /home/opeadmin/greengrass/v2/logs 
+    path: /home/opeadmin/greengrass/v2/
     state: directory
     mode: '0755'

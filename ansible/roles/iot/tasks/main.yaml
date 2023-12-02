@@ -227,7 +227,7 @@
 # https://docs.aws.amazon.com/cli/latest/reference/iot/describe-thing.html
 - name: Get IoT Core thingArn from describe-thing
   shell: |
-    aws iot describe-thing --thing-name k3s_gg_core | \
+    aws iot describe-thing --thing-name {{ THING_NAME }} | \
       jq .thingArn | sed 's/"//g'
   register: thingArn
 

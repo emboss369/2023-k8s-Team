@@ -3,7 +3,7 @@
     src: client-deployment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
 
-- name: Apply IoT Client Application  Pod
+- name: Apply IoT Client Application Pod
   shell:
     cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
   register: result

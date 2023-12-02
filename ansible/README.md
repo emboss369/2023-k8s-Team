@@ -211,6 +211,19 @@ docker manifest push emboss369/greengrass:2.5.3
 
 ### Ansibleの実行
 
+（再実行する場合）すでに作成済みのリソースを削除する処理はまだansibleに入れてないので手作業で今のところは手作業で削除してください。
+- IoT Coreにログインし、作成済みのリソースを削除する
+  - モノ
+    - 例
+  - モノのグループ
+  - Greengrassデバイス
+    - コアデバイス
+    - デプロイ
+  - セキュリティ
+    - ポリシー
+- Greengrass Core端末にログインし、永続化されているデータを削除
+  - sudo rm -rR /home/opeadmin/greengrass
+
 ```sh
 # フォルダ移動
 cd ~/workspace/2023-k8s-Team/ansible
@@ -369,7 +382,7 @@ docker push emboss369/simulated-temperature-sensor:2.31-arm64
 ### (オプション)マルチプラットフォーム対応する
 docker manifest create emboss369/simulated-temperature-sensor:2.31 \
   emboss369/simulated-temperature-sensor:2.31-arm64 \
-  emboss369/simulated-temperature-sensor:2.31-amd64
+  emboss369/simulated-temperature-sensor:2.31-amd64 --amend
 docker manifest annotate --arch amd64 emboss369/simulated-temperature-sensor:2.31 \
   emboss369/simulated-temperature-sensor:2.31-amd64
 docker manifest annotate --arch arm64 emboss369/simulated-temperature-sensor:2.31 \
@@ -489,10 +502,10 @@ https://docs.aws.amazon.com/ja_jp/greengrass/v2/developerguide/client-devices-tu
 
 ### Dockerあるある、起動しない
 tty: true
-kubectl exec -n greengrass -it client-deployment-8486b5ffc-hfsm8 /bin/bash 
+kubectl exec -n greengrass -it client-deployment-b4d794598-t8w6d /bin/bash 
 
 
-python3 SimulatedTemperatureSensor.py \
+python3 -u SimulatedTemperatureSensor.py \
   --thing_name $THING_NAME \
   --topic $MQTT_TOPIC \
   --ca_file $CA_FILE \

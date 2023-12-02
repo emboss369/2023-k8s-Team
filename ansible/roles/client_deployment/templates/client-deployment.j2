@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: iotclient
-        image: emboss369/simulated-temperature-sensor:2.31
+        image: emboss369/simulated-temperature-sensor:2.31.0
+        imagePullPolicy: Always
         env:
         - name: THING_NAME
           value: "{{ IOT_THING_NAME }}"

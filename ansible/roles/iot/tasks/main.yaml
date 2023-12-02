@@ -161,7 +161,7 @@
     cmd: 'aws iot create-policy --policy-name {{ IOT_POLICY_NAME }} --policy-document file://policy.json'
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  when: "'{{ IOT_POLICY_NAME }}' not in policies.stdout"
+  when: "( IOT_POLICY_NAME ) not in policies.stdout"
   register: result
 
 - debug:

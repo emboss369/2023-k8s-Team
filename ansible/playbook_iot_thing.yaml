@@ -1,9 +1,0 @@
----
-- name: Setup iot mono
-  hosts: k3ssv
-  gather_facts: true
-  become: false
-
-  roles:
-    - role: iot
-      tags: iot

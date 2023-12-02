@@ -214,13 +214,18 @@ docker manifest push emboss369/greengrass:2.5.3
 （再実行する場合）すでに作成済みのリソースを削除する処理はまだansibleに入れてないので手作業で今のところは手作業で削除してください。
 - IoT Coreにログインし、作成済みのリソースを削除する
   - モノ
-    - 例
+    - e.g.k3s_gg_core
+    - e.g.k3s_iot_client
   - モノのグループ
+    - e.g.k3s_gg_core_group
   - Greengrassデバイス
     - コアデバイス
+      - e.g.k3s_gg_core
     - デプロイ
+      - e.g.Deployment for k3s_gg_core
   - セキュリティ
     - ポリシー
+      - e.g.k3s_iot_policy
 - Greengrass Core端末にログインし、永続化されているデータを削除
   - sudo rm -rR /home/opeadmin/greengrass
 
@@ -371,23 +376,23 @@ python3 basic_discovery.py \
 
 # イメージを作ってコンテナに格納する（1回のみでよい）
 docker pull --platform linux/amd64 python:3.10-slim
-sudo docker build --platform linux/amd64 -t "emboss369/simulated-temperature-sensor:2.31-amd64" ./
+sudo docker build --platform linux/amd64 -t "emboss369/simulated-temperature-sensor:2.31.0-amd64" ./
 
 docker pull --platform linux/arm64/v8 docker.io/python:3.10-slim
-sudo docker build --platform linux/arm64/v8 -t "emboss369/simulated-temperature-sensor:2.31-arm64" ./
+sudo docker build --platform linux/arm64/v8 -t "emboss369/simulated-temperature-sensor:2.31.0-arm64" ./
 
 ### 各プラットフォーム分をUpする
-docker push emboss369/simulated-temperature-sensor:2.31-amd64
-docker push emboss369/simulated-temperature-sensor:2.31-arm64
+docker push emboss369/simulated-temperature-sensor:2.31.0-amd64
+docker push emboss369/simulated-temperature-sensor:2.31.0-arm64
 ### (オプション)マルチプラットフォーム対応する
-docker manifest create emboss369/simulated-temperature-sensor:2.31 \
-  emboss369/simulated-temperature-sensor:2.31-arm64 \
-  emboss369/simulated-temperature-sensor:2.31-amd64 --amend
-docker manifest annotate --arch amd64 emboss369/simulated-temperature-sensor:2.31 \
-  emboss369/simulated-temperature-sensor:2.31-amd64
-docker manifest annotate --arch arm64 emboss369/simulated-temperature-sensor:2.31 \
-  emboss369/simulated-temperature-sensor:2.31-arm64
-docker manifest push emboss369/simulated-temperature-sensor:2.31
+docker manifest create emboss369/simulated-temperature-sensor:2.31.0 \
+  emboss369/simulated-temperature-sensor:2.31.0-arm64 \
+  emboss369/simulated-temperature-sensor:2.31.0-amd64
+docker manifest annotate --arch amd64 emboss369/simulated-temperature-sensor:2.31.0 \
+  emboss369/simulated-temperature-sensor:2.31.0-amd64
+docker manifest annotate --arch arm64 emboss369/simulated-temperature-sensor:2.31.0 \
+  emboss369/simulated-temperature-sensor:2.31.0-arm64
+docker manifest push emboss369/simulated-temperature-sensor:2.31.0
 ```
 
 

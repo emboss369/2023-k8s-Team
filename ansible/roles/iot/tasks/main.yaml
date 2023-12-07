@@ -116,12 +116,14 @@
       jq .thingArn | sed 's/"//g'
   register: thingArn
   delegate_to: localhost
+  run_once: true
 
 - name: Copy deployment templete
   template:
     src: deplyment.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cli-deployment.json"
   delegate_to: localhost
+  run_once: true
 
 # https://docs.aws.amazon.com/cli/latest/reference/greengrassv2/create-deployment.html
 - name: Create Deplyment for greengrass core thing
@@ -197,7 +199,7 @@
     msg: result
   delegate_to: localhost
   run_once: true
-  
+
 ########################################################################
 #### IoT Client
 

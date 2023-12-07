@@ -54,14 +54,25 @@ flowchart LR
       client([IoT Core Client])
     end
     end
+
+    subgraph k3sds2
+    k3sagent3([k3s Agent ])
+    subgraph docker3[docker]
+      client2([IoT Core Client])
+    end
+    end
     
     k3sserver -- Container Management --> 
     k3sagent -- Manage --> docker
     k3sserver -- Container Management --> k3sagent2
     k3sagent2 -- Manage --> docker2
+    k3sserver -- Container Management --> k3sagent3
+    k3sagent3 -- Manage --> docker3
     client == temperature ==> ggc
+    client2 == temperature ==> ggc
     ggc == temperature ==> cloud[IoT Core in the cloud]
     ansible -. Setup .-> k3sds
+    ansible -. Setup .-> k3sds2
     ansible -. Setup .->  k3sgw
     ansible -. Setup .->  ansible
 ```
@@ -108,7 +119,7 @@ opeadmin  ALL=(ALL) NOPASSWD:ALL
 
 ### EC2を使ったVMの準備（未定稿）
 
-ansibleでVMを３台作成する、その方法は
+ansibleでVMを4台作成する
 
 ### Vagrantを使ったVMの準備
 
@@ -165,6 +176,8 @@ note: 事前にssh接続してfingerprintでyesを押しておくこと。
 k3sgw ←これが表示されること
 (k3s) opeadmin@k3ssv:ansible$ ssh k3sds hostname
 k3sds ←これが表示されること
+(k3s) opeadmin@k3ssv:ansible$ ssh k3sdss hostname
+k3sdss ←これが表示されること
 ```
 
 ### AWS IoT Greengrass イメージを構築する

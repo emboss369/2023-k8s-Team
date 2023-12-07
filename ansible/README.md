@@ -176,8 +176,8 @@ note: 事前にssh接続してfingerprintでyesを押しておくこと。
 k3sgw ←これが表示されること
 (k3s) opeadmin@k3ssv:ansible$ ssh k3sds hostname
 k3sds ←これが表示されること
-(k3s) opeadmin@k3ssv:ansible$ ssh k3sdss hostname
-k3sdss ←これが表示されること
+(k3s) opeadmin@k3ssv:ansible$ ssh k3sds2 hostname
+k3sds2 ←これが表示されること
 ```
 
 ### AWS IoT Greengrass イメージを構築する

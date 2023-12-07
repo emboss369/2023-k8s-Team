@@ -64,5 +64,6 @@
   roles:
     # common_settingsに変数を集約
     - role: common_settings
+      tags: client_deployment
     - role: client_deployment
       tags: client_deployment

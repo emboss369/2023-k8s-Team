@@ -25,6 +25,7 @@ all:
       hosts:
         k3sgw:
         k3sds:
+        k3sds2:
     clients:
       hosts:
         k3sds:

@@ -37,7 +37,7 @@
       tags: greengrass_deployment
 
 - name: Setup iot thing
-  hosts: k3ssv
+  hosts: clients
   gather_facts: true
   become: false
 
@@ -47,7 +47,7 @@
       tags: iot
 
 - name: Setup iot client
-  hosts: k3sds
+  hosts: clients
   gather_facts: true
   become: false
 
@@ -57,7 +57,7 @@
       tags: client_setup
 
 - name: Deploy the iot client pod in Kubernetes
-  hosts: k3ssv
+  hosts: clients
   gather_facts: true
   become: false
 

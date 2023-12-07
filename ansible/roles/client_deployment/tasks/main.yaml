@@ -1,15 +1,18 @@
 - name: IoT Client Application deployment file
   template:
     src: client-deployment.j2
-    dest: "{{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/client-deployment_{{ IOT_THING_NAME }}.yaml"
+  delegate_to: localhost
 
 - name: Apply IoT Client Application Pod
   shell:
-    cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/client-deployment.yaml"
+    cmd: "kubectl apply -f {{ lookup('ansible.builtin.env','HOME') }}/client-deployment_{{ IOT_THING_NAME }}.yaml"
   register: result
+  delegate_to: localhost
 
 - debug:
     msg: result
+  delegate_to: localhost
 
 # - name: Check IoT Client Application Pod running
 #   shell:

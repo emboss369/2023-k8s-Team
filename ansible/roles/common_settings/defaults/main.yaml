@@ -13,9 +13,7 @@ CREDENTIL_PATH: /home/opeadmin/greengrass-v2-credentials/
 COMPONENTS_PATH: /home/opeadmin/components/
 
 # Thing
-IOT_THING_NAME: k3s_iot_client
-IOT_POLICY_NAME: k3s_iot_policy
 
 # for iot client app
-MQTT_TOPIC: data/IoTTask-IoTCoreMono
+
 CERTS_PATH: /home/opeadmin/certs

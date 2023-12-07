@@ -3,18 +3,24 @@
     that: lookup('env', 'AWS_ACCESS_KEY_ID') != ""
     fail_msg: "[ERROR] Please set AWS_ACCESS_KEY_ID"
     success_msg: "AWS_ACCESS_KEY_ID={{lookup('env', 'AWS_ACCESS_KEY_ID')}}"
+  delegate_to: localhost
+  run_once: true
 
 - name: assert [ AWS_SECRET_ACCESS_KEY ]
   assert:
     that: lookup('env', 'AWS_SECRET_ACCESS_KEY') != ""
     fail_msg: "[ERROR] Please set AWS_SECRET_ACCESS_KEY"
     success_msg: "AWS_SECRET_ACCESS_KEY={{lookup('env', 'AWS_SECRET_ACCESS_KEY')}}"
+  delegate_to: localhost
+  run_once: true
 
 - name: Install jq
   ansible.builtin.apt:
     name: jq
     state: present
   become: true
+  delegate_to: localhost
+  run_once: true
 
 - name: Install nodejs
   ansible.builtin.apt:
@@ -23,12 +29,16 @@
     - npm
     state: present
   become: true
+  delegate_to: localhost
+  run_once: true
 
 - name: Update Node.js to Latest Version
   ansible.builtin.shell: |
     npm -g install n
     n stable
   become: true
+  delegate_to: localhost
+  run_once: true
 
 # - name: Install AWS CDK
 #   ansible.builtin.shell: sudo npm install -g aws-cdk
@@ -42,6 +52,8 @@
     sudo rm -rf ~/.aws/
   become: true
   register: result
+  delegate_to: localhost
+  run_once: true
 
 - debug:
     msg: result
@@ -55,6 +67,8 @@
     rm awscliv2.zip
   become: true
   when: ansible_architecture == "aarch64"
+  delegate_to: localhost
+  run_once: true
 
 - name: Install AWS CLI x86_64
   ansible.builtin.shell: |
@@ -65,75 +79,73 @@
     rm awscliv2.zip
   become: true
   when: ansible_architecture == "x86_64"
+  delegate_to: localhost
+  run_once: true
 
 - name: Create credential directory 
   file:
     path: "{{ lookup('ansible.builtin.env','HOME') }}/.aws/"
     state: directory
     mode: "775"
+  delegate_to: localhost
+  run_once: true
 
 - name: Configure your AWS credentials
   template:
     src: credentials.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/.aws/credentials"
     mode: 0664
+  delegate_to: localhost
+  run_once: true
 
 - name: Configure your AWS config file
   template:
     src: config.j2
     dest: /home/opeadmin/.aws/config
     mode: 0664
+  delegate_to: localhost
+  run_once: true
 
-# aws iot create-thing --thing-name k3s_iot_client
-# https://docs.aws.amazon.com/cli/latest/reference/iot/create-thing.html
-- name: Create Thing
-  ansible.builtin.shell: 
-    cmd: 'aws iot create-thing --thing-name {{ IOT_THING_NAME }}'
+########################################################################
+#### IoT Greengrass Core Modules Deployment 
+
+# https://docs.aws.amazon.com/cli/latest/reference/iot/describe-thing.html
+- name: Get IoT Core thingArn from describe-thing
+  shell: |
+    aws iot describe-thing --thing-name {{ THING_NAME }} | \
+      jq .thingArn | sed 's/"//g'
+  register: thingArn
+  delegate_to: localhost
+
+- name: Copy deployment templete
+  template:
+    src: deplyment.j2
+    dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cli-deployment.json"
+  delegate_to: localhost
+
+# https://docs.aws.amazon.com/cli/latest/reference/greengrassv2/create-deployment.html
+- name: Create Deplyment for greengrass core thing
+  shell: |
+    aws greengrassv2 create-deployment \
+      --cli-input-json file://cli-deployment.json
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
+  delegate_to: localhost
+  run_once: true
 
 - debug:
     msg: result
 
-- name: Check certification cert.json
-  stat:
-    path: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/cert.json"
-  register: cert
-
-- name: Create certification 
-  ansible.builtin.shell: |
-    mkdir cert
-    aws iot create-keys-and-certificate --set-as-active > ./cert/cert.json
-    cat ./cert/cert.json | jq .keyPair.PrivateKey -r > ./cert/private.pem.key
-    jq .certificateId ./cert/cert.json > ./cert/certificate-id.txt
-    CERTIFICATED_ID=`cat ./cert/certificate-id.txt | sed 's/"//g'`
-    aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text  --query certificateDescription.certificatePem > ./cert/device.pem.crt
-  args:
-    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  when: not cert.stat.exists
-  register: result
-
-- debug:
-    msg: result
-  when: not cert.stat.exists
-
-- name: Check created certification
-  ansible.builtin.shell: |
-    openssl  x509 -text < ./cert/device.pem.crt
-  args:
-    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  when: not cert.stat.exists
-  register: result
-
-- debug:
-    msg: result
-  when: not cert.stat.exists
+########################################################################
+#### Client Policy File 
 
 - name: Copy policy templte
   template:
     src: k3s_iot_policy.j2
     dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/policy.json"
+  delegate_to: localhost
+  run_once: true
 
 # - name: Check IoT Policy
 #   ansible.builtin.shell: 
@@ -151,10 +163,11 @@
 #   register: result
 
 # https://docs.aws.amazon.com/cli/latest/reference/iot/create-policy.html
-
 - name: Get IoT Policies
   ansible.builtin.shell: aws iot list-policies | jq '.policies[] | .policyName'
   register: policies
+  delegate_to: localhost
+  run_once: true
 
 - name: Create IoT Policy
   ansible.builtin.shell: 
@@ -163,9 +176,13 @@
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   when: "( IOT_POLICY_NAME ) not in policies.stdout"
   register: result
+  delegate_to: localhost
+  run_once: true
 
 - debug:
     msg: result
+  delegate_to: localhost
+  run_once: true
 
 - name: Get IoT Policy
   ansible.builtin.shell: 
@@ -173,41 +190,101 @@
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
+  delegate_to: localhost
+  run_once: true
+
+- debug:
+    msg: result
+  delegate_to: localhost
+  run_once: true
+  
+########################################################################
+#### IoT Client
+
+# aws iot create-thing --thing-name k3s_iot_client
+# https://docs.aws.amazon.com/cli/latest/reference/iot/create-thing.html
+- name: Create Thing
+  ansible.builtin.shell: 
+    cmd: 'aws iot create-thing --thing-name {{ IOT_THING_NAME }}'
+  args:
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  register: result
+  delegate_to: localhost
 
 - debug:
     msg: result
 
+- name: Check certification cert.json
+  stat:
+    path: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/{{ IOT_THING_NAME }}/cert.json"
+  register: cert
+  delegate_to: localhost
+
+- name: Create certification 
+  ansible.builtin.shell: |
+    mkdir -p cert/{{ IOT_THING_NAME }}
+    aws iot create-keys-and-certificate --set-as-active > ./cert/{{ IOT_THING_NAME }}/cert.json
+    cat ./cert/{{ IOT_THING_NAME }}/cert.json | jq .keyPair.PrivateKey -r > ./cert/{{ IOT_THING_NAME }}/private.pem.key
+    jq .certificateId ./cert/{{ IOT_THING_NAME }}/cert.json > ./cert/{{ IOT_THING_NAME }}/certificate-id.txt
+    CERTIFICATED_ID=`cat ./cert/{{ IOT_THING_NAME }}/certificate-id.txt | sed 's/"//g'`
+    aws iot describe-certificate --certificate-id $CERTIFICATED_ID --output text  --query certificateDescription.certificatePem > ./cert/{{ IOT_THING_NAME }}/device.pem.crt
+  args:
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  when: not cert.stat.exists
+  register: result
+  delegate_to: localhost
+
+- debug:
+    msg: result
+  when: not cert.stat.exists
+
+- name: Check created certification
+  ansible.builtin.shell: |
+    openssl  x509 -text < ./cert/{{ IOT_THING_NAME }}/device.pem.crt
+  args:
+    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
+  when: not cert.stat.exists
+  register: result
+  delegate_to: localhost
+
+- debug:
+    msg: result
+  when: not cert.stat.exists
+
 - name: Attach a IoT policy to a certificate
   ansible.builtin.shell: |
-    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    CERTARN=`jq .certificateArn ./cert/{{ IOT_THING_NAME }}/cert.json  | sed 's/"//g'`
     aws iot attach-principal-policy --principal $CERTARN --policy-name {{ IOT_POLICY_NAME }}
     aws iot list-principal-policies --principal $CERTARN
     aws iot attach-thing-principal --thing-name {{ IOT_THING_NAME }} --principal $CERTARN
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
+  delegate_to: localhost
 
 - debug:
     msg: result
 
 - name: Show things principals
   ansible.builtin.shell: |
-    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    CERTARN=`jq .certificateArn ./cert/{{ IOT_THING_NAME }}/cert.json  | sed 's/"//g'`
     aws iot list-thing-principals --thing-name {{ IOT_THING_NAME }}
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
+  delegate_to: localhost
 
 - debug:
     msg: result
 
 - name: Show endpoint
   ansible.builtin.shell: |
-    CERTARN=`jq .certificateArn ./cert/cert.json  | sed 's/"//g'`
+    CERTARN=`jq .certificateArn ./cert/{{ IOT_THING_NAME }}/cert.json  | sed 's/"//g'`
     aws iot describe-endpoint --region {{ AWS_REGION }}
   args:
     chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
   register: result
+  delegate_to: localhost
 
 - debug:
     msg: result
@@ -220,31 +297,7 @@
       --core-device-thing-name {{ THING_NAME }} \
       --entries thingName={{ IOT_THING_NAME }} 
   register: result
-
-- debug:
-    msg: result
-
-# https://docs.aws.amazon.com/cli/latest/reference/iot/describe-thing.html
-- name: Get IoT Core thingArn from describe-thing
-  shell: |
-    aws iot describe-thing --thing-name {{ THING_NAME }} | \
-      jq .thingArn | sed 's/"//g'
-  register: thingArn
-
-- name: Copy deployment templete
-  template:
-    src: deplyment.j2
-    dest: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cli-deployment.json"
-
-
-# https://docs.aws.amazon.com/cli/latest/reference/greengrassv2/create-deployment.html
-- name: Create Deplyment for greengrass core thing
-  shell: |
-    aws greengrassv2 create-deployment \
-      --cli-input-json file://cli-deployment.json
-  args:
-    chdir: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible"
-  register: result
+  delegate_to: localhost
 
 - debug:
     msg: result

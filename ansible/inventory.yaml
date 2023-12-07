@@ -11,8 +11,21 @@ all:
     k3sds:
       hostname: k3sds
       ansible_host: 10.211.55.26
+      IOT_THING_NAME: k3s_iot_client
+      IOT_POLICY_NAME: k3s_iot_policy
+      MQTT_TOPIC: data/k3s_iot_client/Temperature
+    k3sds2:
+      hostname: k3sds2
+      ansible_host: 10.211.55.27
+      IOT_THING_NAME: k3s_iot_client2
+      IOT_POLICY_NAME: k3s_iot_policy
+      MQTT_TOPIC: data/k3s_iot_client2/Temperature
   children:
     agents:
       hosts:
         k3sgw:
         k3sds:
+    clients:
+      hosts:
+        k3sds:
+        k3sds2:

@@ -6,13 +6,13 @@
 
 - name: Copy certification file
   copy:
-    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/device.pem.crt"
+    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/{{ IOT_THING_NAME }}/device.pem.crt"
     dest: "{{ CERTS_PATH }}/device.pem.crt"
     mode: "776"
 
 - name: Copy key file
   copy:
-    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/private.pem.key"
+    src: "{{ lookup('ansible.builtin.env','HOME') }}/workspace/2023-k8s-Team/ansible/cert/{{ IOT_THING_NAME }}/private.pem.key"
     dest: "{{ CERTS_PATH }}/private.pem.key"
     mode: "776"
 

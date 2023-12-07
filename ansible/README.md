@@ -32,6 +32,7 @@
 |k3ssv|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.24|
 |k3sgw|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.25|
 |k3sds|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.26|
+|k3sds2|Ubuntu| 22.04|server|arm64|opeadmin|10.211.55.27|
 
 ## システム構成
 

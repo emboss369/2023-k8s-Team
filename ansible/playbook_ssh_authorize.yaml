@@ -1,28 +1,28 @@
 ---
-- hosts: k3sds2
+- hosts: agents
   gather_facts: true
   gather_subset:
     - min
     - network
 
   tasks:
-    # - name: create directory for ssh keypair on localhost
-    #   ansible.builtin.file:
-    #     state: directory
-    #     path: "{{ lookup('ansible.builtin.env','HOME') }}/.ssh/"
-    #     mode: 0700
-    #   delegate_to: localhost
-    #   run_once: true
+    - name: create directory for ssh keypair on localhost
+      ansible.builtin.file:
+        state: directory
+        path: "{{ lookup('ansible.builtin.env','HOME') }}/.ssh/"
+        mode: 0700
+      delegate_to: localhost
+      run_once: true
 
-    # - name: create key pair
-    #   community.crypto.openssh_keypair:
-    #     path: "{{ lookup('ansible.builtin.env','HOME') }}/.ssh/id_rsa_ansible"
-    #   delegate_to: localhost
-    #   run_once: true
+    - name: create key pair
+      community.crypto.openssh_keypair:
+        path: "{{ lookup('ansible.builtin.env','HOME') }}/.ssh/id_rsa_ansible"
+      delegate_to: localhost
+      run_once: true
 
-    # - name: debug
-    #   ansible.builtin.debug:
-    #     msg: "result is {{ ansible_env.USER }}"
+    - name: debug
+      ansible.builtin.debug:
+        msg: "result is {{ ansible_env.USER }}"
 
     - name: authorize public key
       ansible.posix.authorized_key:

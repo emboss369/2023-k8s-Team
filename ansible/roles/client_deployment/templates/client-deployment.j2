@@ -7,7 +7,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: greengrass
-  name: client-deployment-{{ hostname }}"
+  name: client-{{ hostname }}-deployment"
 spec:
   selector:
     matchLabels:

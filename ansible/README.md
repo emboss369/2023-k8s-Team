@@ -276,6 +276,9 @@ roles/client_deployment/defaults/main.yaml
 ### デプロイの環境設定（デプロイ先）
 roles/greengrass_deployment/defaults/main.yaml
 
+### 上記はcommonに集約されました
+roles/common_settings/defaults/main.yaml
+
 # Ansible実行
 (k3s) opeadmin@k3ssv:ansible$ ansible-playbook -i inventory.yaml playbook_k3s.yaml --private-key ~/.ssh/id_rsa_ansible
 

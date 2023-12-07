@@ -7,7 +7,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: greengrass
-  name: client-deployment
+  name: client-deployment-{{ hostname }}"
 spec:
   selector:
     matchLabels:
@@ -37,4 +37,4 @@ spec:
         hostPath:
           path: {{ CERTS_PATH }}
           type: Directory
-      nodeName: "{{ TARGET_NODE_NAME }}"
+      nodeName: "{{ hostname }}"
